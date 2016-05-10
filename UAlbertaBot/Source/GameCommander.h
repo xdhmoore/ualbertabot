@@ -39,6 +39,10 @@ class GameCommander
 	BWAPI::Unitset          _scoutUnits;
 
     bool                    _initialScoutSet;
+	//TODO make this configurable
+	unsigned int			_numScouts;
+	//TODO make this configurable
+	float					_maxScoutToWorkerRatio;
 
     void                    assignUnit(BWAPI::Unit unit, BWAPI::Unitset & set);
 	bool                    isAssigned(BWAPI::Unit unit) const;

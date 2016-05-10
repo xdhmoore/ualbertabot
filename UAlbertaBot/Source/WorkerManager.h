@@ -43,6 +43,7 @@ public:
     int         getNumGasWorkers();
     int         getNumIdleWorkers();
     void        setScoutWorker(BWAPI::Unit worker);
+	float		getScoutToWorkerRatio();
 
     bool        isWorkerScout(BWAPI::Unit worker);
     bool        isFree(BWAPI::Unit worker);

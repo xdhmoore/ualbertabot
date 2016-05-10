@@ -44,7 +44,7 @@
         "DrawUnitHealthBars"        : true,
         "DrawProductionInfo"        : true, 
         "DrawBuildOrderSearchInfo"  : false,
-        "DrawScoutInfo"             : false,
+        "DrawScoutInfo"             : true,
         "DrawEnemyUnitInfo"         : false,
         "DrawModuleTimers"          : false,
         "DrawResourceInfo"          : false,
@@ -67,7 +67,7 @@
         "UseScoutManager"           : true,
         "UseCombatCommander"        : true,
         "UseBuildOrderSearch"       : true,
-        "UseStrategyIO"             : true,
+        "UseStrategyIO"             : false,
         "UseAutoObserver"           : false
     },
     

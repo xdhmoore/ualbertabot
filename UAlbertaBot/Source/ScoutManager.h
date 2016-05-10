@@ -3,42 +3,29 @@
 #include "Common.h"
 #include "MicroManager.h"
 #include "InformationManager.h"
+#include "Scout.h"
 
 namespace UAlbertaBot
 {
 class ScoutManager 
 {
-	BWAPI::Unit	        _workerScout;
-    std::string                     _scoutStatus;
-    std::string                     _gasStealStatus;
-	int				                _numWorkerScouts;
-	bool			                _scoutUnderAttack;
-    bool                            _didGasSteal;
-    bool                            _gasStealFinished;
-    int                             _currentRegionVertexIndex;
-    int                             _previousScoutHP;
-	std::vector<BWAPI::Position>    _enemyRegionVertices;
-
-	bool                            enemyWorkerInRadius();
-    bool			                immediateThreat();
-    void                            gasSteal();
-    int                             getClosestVertexIndex(BWAPI::Unit unit);
-    BWAPI::Position                 getFleePosition();
-	BWAPI::Unit	        getEnemyGeyser();
-	BWAPI::Unit	        closestEnemyWorker();
-    void                            followPerimeter();
-	void                            moveScouts();
-    void                            drawScoutInformation(int x, int y);
-    void                            calculateEnemyRegionVertices();
+	std::vector<Scout> *			_scouts;
+	unsigned int					_numScouts;
 
 	ScoutManager();
 
+	bool							scoutsFull();
+	void							removeRandomScout();
+	void							addNewScout(BWAPI::Unit);
+	
 public:
-
+	
     static ScoutManager & Instance();
 
-	void update();
+	~ScoutManager();
 
+	void update();
+	
     void setWorkerScout(BWAPI::Unit unit);
 
 	void onSendText(std::string text);

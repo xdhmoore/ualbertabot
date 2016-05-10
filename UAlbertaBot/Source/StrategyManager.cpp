@@ -91,6 +91,7 @@ void StrategyManager::addStrategy(const std::string & name, Strategy & strategy)
 
 const MetaPairVector StrategyManager::getBuildOrderGoal()
 {
+	//TODO - make sure there are # scounts on the map at all times - start with workers
     BWAPI::Race myRace = BWAPI::Broodwar->self()->getRace();
 
     if (myRace == BWAPI::Races::Protoss)

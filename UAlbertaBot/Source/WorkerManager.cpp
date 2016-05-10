@@ -251,6 +251,7 @@ BWAPI::Unit WorkerManager::getClosestMineralWorkerTo(BWAPI::Unit enemyUnit)
     return closestMineralWorker;
 }
 
+//TODO update to return a collection
 BWAPI::Unit WorkerManager::getWorkerScout()
 {
     // for each of our workers
@@ -286,6 +287,25 @@ void WorkerManager::handleMoveWorkers()
 			Micro::SmartMove(worker, data.position);
 		}
 	}
+}
+
+float WorkerManager::getScoutToWorkerRatio()
+{
+	int numWorkers = 0;
+	int numScouts = 0;
+	//TODO cache value for a single frame?
+	for (auto & worker : workerData.getWorkers())
+	{
+		UAB_ASSERT(worker != nullptr, "Worker was null");
+
+		// if it is a move worker
+		if (workerData.getWorkerJob(worker) == WorkerData::Scout)
+		{
+			numScouts += 1;
+		}
+		numWorkers += 1;
+	}
+	return static_cast<float>(numScouts) / static_cast<float>(numWorkers);
 }
 
 // set a worker to mine minerals

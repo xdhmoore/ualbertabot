@@ -5,7 +5,10 @@
 using namespace UAlbertaBot;
 
 GameCommander::GameCommander() 
-    : _initialScoutSet(false)
+    : _initialScoutSet(false),
+	  _numScouts(10),//TODO make configurable
+	  _maxScoutToWorkerRatio(0.2f) //TODO make configurable
+
 {
 
 }
@@ -141,7 +144,8 @@ void GameCommander::setValidUnits()
 void GameCommander::setScoutUnits()
 {
     // if we haven't set a scout unit, do it
-    if (_scoutUnits.empty() && !_initialScoutSet)
+    if (_scoutUnits.size() < _numScouts &&
+		WorkerManager::Instance().getScoutToWorkerRatio() < _maxScoutToWorkerRatio)
     {
         BWAPI::Unit supplyProvider = getFirstSupplyProvider();
 

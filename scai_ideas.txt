@@ -3,10 +3,15 @@ Ideas for bot improvements:
  - use neural network or similar to choose build goal based on input about enemy and economy
  - Hidden markov models to make inferences about what the enemy has & is doing?
  - add ability to do strategic goals like: damage enemy's economy, kill specific units or buildings, block areas of the map
+   - add ability to combat to calculate if goal succeeded rather than just if units won or lost
  - handle combat better? scenarios like drops, high-ground, chokes, harrass & cutting off enemy forces, etc.
  - add 3 big rules:
    - when enemy attacks -> defend
    - when enemy expands -> attack
    - when enemy defends -> expand
 
+ - build order based on:
+   - game time
+   - enemy buildings
+   - enemy units
 
