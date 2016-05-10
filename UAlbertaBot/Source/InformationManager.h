@@ -30,6 +30,7 @@ class InformationManager
     void                    initializeBaseInfoVector();
     void                    updateUnitInfo();
     void                    updateBaseLocationInfo();
+	void					updateAttackState();
     void                    updateOccupiedRegions(BWTA::Region * region,BWAPI::Player player);
     bool                    isValidUnit(BWAPI::Unit unit);
 

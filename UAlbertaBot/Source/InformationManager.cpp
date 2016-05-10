@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "InformationManager.h"
+#include "UnitUtil.h"
 
 using namespace UAlbertaBot;
 
@@ -70,6 +71,50 @@ void InformationManager::update()
 	updateBaseLocationInfo();
 	updateNumBases();
 	updateNumDefenses();
+	updateAttackState();
+}
+
+void InformationManager::updateAttackState()
+{
+	double WITHIN_ATTACK_THRESHOLD = 1000;
+
+	BWAPI::TilePosition startTile = BWAPI::Broodwar->self()->getStartLocation();
+
+	//Draw Attack Radius
+	BWAPI::Broodwar->drawCircleMap((BWAPI::Position)startTile, (int)WITHIN_ATTACK_THRESHOLD, BWAPI::Colors::Blue);
+
+	//For every enemy unit that is known
+	for (auto & unit : BWAPI::Broodwar->enemy()->getUnits())
+	{
+		//If the unit is a combat unit
+		if (UnitUtil::IsCombatUnit(unit) && UnitUtil::IsValidUnit(unit))
+		{
+			//See if there are any enemy units close enough to our buildings
+			for (auto & building : BWAPI::Broodwar->self()->getUnits())
+			{
+				if (building->getType().isBuilding())
+				{
+					Rect selfRect = UnitUtil::GetRect(building);
+					Rect enemyRect = UnitUtil::GetRect(unit);
+					double distance = UnitUtil::GetDistanceBetweenTwoRectangles(selfRect, enemyRect);
+
+					if (distance <= WITHIN_ATTACK_THRESHOLD) {
+						BWAPI::Position b = building->getPosition();
+						BWAPI::Position p = unit->getPosition();
+						BWAPI::Position coord = BWAPI::Position(p.x, p.y - 60);
+						BWAPI::Position draw = BWAPI::Position(p.x, p.y - 40);
+
+						BWAPI::Broodwar->drawCircleMap(b.x, b.y, 20, BWAPI::Colors::Red);
+						BWAPI::Broodwar->drawCircleMap(p.x, p.y, 20, BWAPI::Colors::Red);
+						BWAPI::Broodwar->printf("Enemy is Attacking!!!!!");
+						BWAPI::Broodwar->drawTextMap(coord, "%d, %d", p.x, p.y);
+						BWAPI::Broodwar->drawTextMap(draw, "Enemy is %.0lf away", distance);
+						break;
+					}
+				}
+			}						
+		}
+	}
 }
 
 void InformationManager::updateUnitInfo() 
