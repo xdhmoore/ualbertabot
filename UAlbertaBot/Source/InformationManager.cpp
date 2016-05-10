@@ -3,6 +3,10 @@
 
 using namespace UAlbertaBot;
 
+int numEnemyBases = 1;
+int numEnemyDefenses = 0;
+std::unordered_set<BWAPI::Unit> enemyBases;
+
 InformationManager::InformationManager()
     : _self(BWAPI::Broodwar->self())
     , _enemy(BWAPI::Broodwar->enemy())
@@ -16,10 +20,56 @@ InformationManager & InformationManager::Instance()
 	return instance;
 }
 
+void updateNumBases()
+{
+	if (BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus) > numEnemyBases ||
+		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Terran_Command_Center) > numEnemyBases ||
+		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Zerg_Hatchery) +
+		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Zerg_Lair) +
+		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Zerg_Hive)	> numEnemyBases) {
+
+		numEnemyBases++;
+		BWAPI::Broodwar->printf("Enemy Has Expanded! Current number of enemy bases = %d", numEnemyBases);
+	}
+
+	for (BWAPI::Unit u : BWAPI::Broodwar->enemy()->getUnits()) {
+		//if this unit is in fact a building
+		if (u->getType().isBuilding()) {
+			//check if it is a base and print position if it is
+			if (u->getType() == BWAPI::UnitTypes::Protoss_Nexus ||
+				u->getType() == BWAPI::UnitTypes::Terran_Command_Center ||
+				u->getType() == BWAPI::UnitTypes::Zerg_Hatchery ||
+				u->getType() == BWAPI::UnitTypes::Zerg_Lair ||
+				u->getType() == BWAPI::UnitTypes::Zerg_Hive) {
+
+				if (!enemyBases.count(u)) {
+					enemyBases.emplace(u);
+					BWAPI::Broodwar->printf("Enemy Has a Base at Coordinates: (%d, %d)", u->getPosition().x, u->getPosition().y);
+				}
+			}
+		}
+	}
+}
+
+void updateNumDefenses()
+{
+	if (BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon) > numEnemyDefenses ||
+		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker) > numEnemyDefenses ||
+		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Zerg_Sunken_Colony) > numEnemyDefenses) {
+
+		numEnemyDefenses = BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon) +
+			BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker) +
+			BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Zerg_Sunken_Colony);
+		BWAPI::Broodwar->printf("Enemy Has Constructed Defenses! Current number of enemy defenses = %d", numEnemyDefenses);
+	}
+}
+
 void InformationManager::update() 
 {
 	updateUnitInfo();
 	updateBaseLocationInfo();
+	updateNumBases();
+	updateNumDefenses();
 }
 
 void InformationManager::updateUnitInfo() 
