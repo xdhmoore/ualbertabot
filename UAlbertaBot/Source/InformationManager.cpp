@@ -7,6 +7,7 @@ using namespace UAlbertaBot;
 int numEnemyBases = 1;
 int numEnemyDefenses = 0;
 std::unordered_set<BWAPI::Unit> enemyBases;
+std::unordered_set<BWAPI::Unit> enemyDefenses;
 
 InformationManager::InformationManager()
     : _self(BWAPI::Broodwar->self())
@@ -45,11 +46,20 @@ void updateNumBases()
 
 				if (!enemyBases.count(u)) {
 					enemyBases.emplace(u);
-					BWAPI::Broodwar->printf("Enemy Has a Base at Coordinates: (%d, %d)", u->getPosition().x, u->getPosition().y);
+					BWAPI::Position pos = u->getPosition();
+					BWAPI::Broodwar->printf("Enemy Has a Base at Coordinates: (%d, %d)", pos.x, pos.y);
+					BWAPI::Broodwar->drawCircleMap(pos.x, pos.y, 20, BWAPI::Colors::Red);
+					/* TODO: Here we would set current enemy strategy and then try and immediately attack this new base with units available*/
 				}
 			}
 		}
 	}
+}
+
+bool isDefense(BWAPI::UnitType type) {
+	return type == BWAPI::UnitTypes::Protoss_Photon_Cannon ||
+		type == BWAPI::UnitTypes::Zerg_Sunken_Colony ||
+		type == BWAPI::UnitTypes::Terran_Bunker;
 }
 
 void updateNumDefenses()
@@ -62,6 +72,18 @@ void updateNumDefenses()
 			BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker) +
 			BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Zerg_Sunken_Colony);
 		BWAPI::Broodwar->printf("Enemy Has Constructed Defenses! Current number of enemy defenses = %d", numEnemyDefenses);
+		for (BWAPI::Unit u : BWAPI::Broodwar->enemy()->getUnits()) {
+			//if this unit is in fact a defense
+			if (isDefense(u->getType())) {
+				if (!enemyDefenses.count(u)) {
+					enemyDefenses.emplace(u);
+					BWAPI::Position pos = u->getPosition();
+					BWAPI::Broodwar->printf("Enemy Has a Defense at Coordinates: (%d, %d)", pos.x, pos.y);
+					BWAPI::Broodwar->drawCircleMap(pos.x, pos.y, 20, BWAPI::Colors::Red);
+					/* TODO: Here we would change the enemy strategy based on whether we think they are defending with this unit*/
+				}
+			}
+		}
 	}
 }
 
