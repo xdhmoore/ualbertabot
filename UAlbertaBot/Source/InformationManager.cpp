@@ -266,6 +266,10 @@ void InformationManager::updateOccupiedRegions(BWTA::Region * region, BWAPI::Pla
 	}
 }
 
+std::pair<state, BWAPI::Position> InformationManager::getCurrentAction() {
+	return _currentAction;
+}
+
 bool InformationManager::isEnemyBuildingInRegion(BWTA::Region * region) 
 {
 	// invalid regions aren't considered the same, but they will both be null
