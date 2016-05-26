@@ -9,8 +9,8 @@ namespace UAlbertaBot
 {
 class ScoutManager 
 {
-	std::vector<Scout> *			_scouts;
-	unsigned int					_numScouts;
+	std::vector<std::shared_ptr<Scout>>*		_scouts;
+	unsigned int							_numScouts;
 
 	ScoutManager();
 

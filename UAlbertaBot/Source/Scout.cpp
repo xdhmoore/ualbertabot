@@ -6,8 +6,6 @@
 
 using namespace UAlbertaBot;
 
-std::vector<BWAPI::Position> Scout::enemyRegionVertices;
-
 Scout::Scout(BWAPI::Unit unit)
 	: _workerScout(unit)
 	, _scoutUnderAttack(false)
@@ -17,17 +15,17 @@ Scout::Scout(BWAPI::Unit unit)
 	, _gasStealFinished(false)
 	, _currentRegionVertexIndex(-1)
 	, _previousScoutHP(0)
+	, _targetRegionVertices(std::make_shared<std::vector<BWAPI::Position>>())
 {
-	if (enemyRegionVertices.empty())
-	{
-		Scout::calculateEnemyRegionVertices();
-	}
+	//TODO change this to make bases alterable
+	calculateTargetRegionVertices(InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy()));
 	//_workerScout = unit;
 }
 
 
 Scout::~Scout()
 {
+
 }
 
 BWAPI::Unit Scout::getWorkerScout() {
@@ -43,10 +41,10 @@ void Scout::drawScoutInformation(int x, int y)
 
 	BWAPI::Broodwar->drawTextScreen(x, y, "ScoutInfo: %s", _scoutStatus.c_str());
 	BWAPI::Broodwar->drawTextScreen(x, y + 10, "GasSteal: %s", _gasStealStatus.c_str());
-	for (size_t i(0); i < Scout::enemyRegionVertices.size(); ++i)
+	for (size_t i(0); i < _targetRegionVertices->size(); ++i)
 	{
-		BWAPI::Broodwar->drawCircleMap(Scout::enemyRegionVertices[i], 4, BWAPI::Colors::Green, false);
-		BWAPI::Broodwar->drawTextMap(Scout::enemyRegionVertices[i], "%d", i);
+		BWAPI::Broodwar->drawCircleMap(_targetRegionVertices->at(i), 4, BWAPI::Colors::Green, false);
+		BWAPI::Broodwar->drawTextMap(_targetRegionVertices->at(i), "%d", i);
 	}
 }
 
@@ -318,9 +316,9 @@ int Scout::getClosestVertexIndex(BWAPI::Unit unit)
 	int closestIndex = -1;
 	double closestDistance = 10000000;
 
-	for (size_t i(0); i < Scout::enemyRegionVertices.size(); ++i)
+	for (size_t i(0); i < _targetRegionVertices->size(); ++i)
 	{
-		double dist = unit->getDistance(Scout::enemyRegionVertices[i]);
+		double dist = unit->getDistance(_targetRegionVertices->at(i));
 		if (dist < closestDistance)
 		{
 			closestDistance = dist;
@@ -333,7 +331,7 @@ int Scout::getClosestVertexIndex(BWAPI::Unit unit)
 
 BWAPI::Position Scout::getFleePosition()
 {
-	UAB_ASSERT_WARNING(!Scout::enemyRegionVertices.empty(), "We should have an enemy region vertices if we are fleeing");
+	UAB_ASSERT_WARNING(!_targetRegionVertices->empty(), "We should have an enemy region vertices if we are fleeing");
 
 	BWTA::BaseLocation * enemyBaseLocation = InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy());
 
@@ -353,32 +351,30 @@ BWAPI::Position Scout::getFleePosition()
 		{
 			// set the current index so we know how to iterate if we are still fleeing later
 			_currentRegionVertexIndex = closestPolygonIndex;
-			return Scout::enemyRegionVertices[closestPolygonIndex];
+			return _targetRegionVertices->at(closestPolygonIndex);
 		}
 	}
 	// if we are still fleeing from the previous frame, get the next location if we are close enough
 	else
 	{
-		double distanceFromCurrentVertex = Scout::enemyRegionVertices[_currentRegionVertexIndex].getDistance(_workerScout->getPosition());
+		double distanceFromCurrentVertex = _targetRegionVertices->at(_currentRegionVertexIndex).getDistance(_workerScout->getPosition());
 
 		// keep going to the next vertex in the perimeter until we get to one we're far enough from to issue another move command
 		while (distanceFromCurrentVertex < 128)
 		{
-			_currentRegionVertexIndex = (_currentRegionVertexIndex + 1) % Scout::enemyRegionVertices.size();
+			_currentRegionVertexIndex = (_currentRegionVertexIndex + 1) % _targetRegionVertices->size();
 
-			distanceFromCurrentVertex = Scout::enemyRegionVertices[_currentRegionVertexIndex].getDistance(_workerScout->getPosition());
+			distanceFromCurrentVertex = _targetRegionVertices->at(_currentRegionVertexIndex).getDistance(_workerScout->getPosition());
 		}
 
-		return Scout::enemyRegionVertices[_currentRegionVertexIndex];
+		return _targetRegionVertices->at(_currentRegionVertexIndex);
 	}
 
 }
 
 
-
-void Scout::calculateEnemyRegionVertices()
+void Scout::calculateTargetRegionVertices(BWTA::BaseLocation* enemyBaseLocation)
 {
-	BWTA::BaseLocation * enemyBaseLocation = InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy());
 	//UAB_ASSERT_WARNING(enemyBaseLocation, "We should have an enemy base location if we are fleeing");
 
 	if (!enemyBaseLocation)
@@ -406,6 +402,7 @@ void Scout::calculateEnemyRegionVertices()
 
 		if (BWTA::getRegion(tp) != enemyRegion)
 		{
+			//we only want tiles in the region of the enemy's base we are exploring
 			continue;
 		}
 
@@ -439,11 +436,10 @@ void Scout::calculateEnemyRegionVertices()
 		}
 	}
 
-
-	std::vector<BWAPI::Position> sortedVertices;
+	auto sortedVertices = std::make_shared<std::vector<BWAPI::Position>>();
 	BWAPI::Position current = *unsortedVertices.begin();
 
-	Scout::enemyRegionVertices.push_back(current);
+	_targetRegionVertices->push_back(current);
 	unsortedVertices.erase(current);
 
 	// while we still have unsorted vertices left, find the closest one remaining to current
@@ -464,7 +460,7 @@ void Scout::calculateEnemyRegionVertices()
 		}
 
 		current = bestPos;
-		sortedVertices.push_back(bestPos);
+		sortedVertices->push_back(bestPos);
 		unsortedVertices.erase(bestPos);
 	}
 
@@ -479,17 +475,17 @@ void Scout::calculateEnemyRegionVertices()
 		int maxFarthestEnd = 0;
 
 		// for each starting vertex
-		for (int i(0); i < (int)sortedVertices.size(); ++i)
+		for (int i(0); i < (int)sortedVertices->size(); ++i)
 		{
 			int farthest = 0;
 			int farthestIndex = 0;
 
 			// only test half way around because we'll find the other one on the way back
-			for (size_t j(1); j < sortedVertices.size() / 2; ++j)
+			for (size_t j(1); j < sortedVertices->size() / 2; ++j)
 			{
-				int jindex = (i + j) % sortedVertices.size();
+				int jindex = (i + j) % sortedVertices->size();
 
-				if (sortedVertices[i].getDistance(sortedVertices[jindex]) < distanceThreshold)
+				if (sortedVertices->at(i).getDistance(sortedVertices->at(jindex)) < distanceThreshold)
 				{
 					farthest = j;
 					farthestIndex = jindex;
@@ -510,17 +506,17 @@ void Scout::calculateEnemyRegionVertices()
 			break;
 		}
 
-		double dist = sortedVertices[maxFarthestStart].getDistance(sortedVertices[maxFarthestEnd]);
+		double dist = sortedVertices->at(maxFarthestStart).getDistance(sortedVertices->at(maxFarthestEnd));
 
-		std::vector<BWAPI::Position> temp;
+		auto temp = std::make_shared<std::vector<BWAPI::Position>>();
 
-		for (size_t s(maxFarthestEnd); s != maxFarthestStart; s = (s + 1) % sortedVertices.size())
+		for (size_t s(maxFarthestEnd); s != maxFarthestStart; s = (s + 1) % sortedVertices->size())
 		{
-			temp.push_back(sortedVertices[s]);
+			temp->push_back(sortedVertices->at(s));
 		}
 
-		sortedVertices = temp;
+		sortedVertices = std::move(temp);
 	}
 
-	Scout::enemyRegionVertices = sortedVertices;
+	_targetRegionVertices = std::move(sortedVertices);
 }

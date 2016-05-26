@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "Common.h"
 
 namespace UAlbertaBot
@@ -14,6 +15,7 @@ class Scout
 	bool                            _gasStealFinished;
 	int                             _currentRegionVertexIndex;
 	int                             _previousScoutHP;
+	std::shared_ptr<std::vector<BWAPI::Position>>	_targetRegionVertices;
 	
 	bool                            enemyWorkerInRadius();
 	bool			                immediateThreat();
@@ -24,13 +26,9 @@ class Scout
 	BWAPI::Unit						closestEnemyWorker();
 	void                            followPerimeter();
 
-	
-
-
 	public:
 
-		static std::vector<BWAPI::Position>		enemyRegionVertices;
-		static void	calculateEnemyRegionVertices();
+		void calculateTargetRegionVertices(BWTA::BaseLocation*);
 
 		Scout(BWAPI::Unit);
 		~Scout();

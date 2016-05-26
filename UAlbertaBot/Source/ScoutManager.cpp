@@ -8,7 +8,7 @@ ScoutManager::ScoutManager()
 	//TODO consolidate with GameCommander
 	:	_numScouts(10)
 {
-	_scouts = new std::vector<Scout>();
+	_scouts = new std::vector<std::shared_ptr<Scout>>();
 }
 
 ScoutManager & ScoutManager::Instance() 
@@ -24,9 +24,9 @@ void ScoutManager::update()
         return;
     }
 
-	std::for_each(_scouts->begin(), _scouts->end(), [](Scout s){
-		s.moveScouts();
-		s.drawScoutInformation(200, 320);
+	std::for_each(_scouts->begin(), _scouts->end(), [](std::shared_ptr<Scout> s){
+		s->moveScouts();
+		s->drawScoutInformation(200, 320);
 	});
 
 }
@@ -38,16 +38,15 @@ bool ScoutManager::scoutsFull() {
 void ScoutManager::removeRandomScout() {
 
 	int idxToErase = rand() % _scouts->size();
-	Scout scoutToRemove = _scouts->at(idxToErase);
+	auto scoutToRemove = _scouts->at(idxToErase);
 
-	WorkerManager::Instance().finishedWithWorker(scoutToRemove.getWorkerScout());
+	WorkerManager::Instance().finishedWithWorker(scoutToRemove->getWorkerScout());
 
 	_scouts->erase(_scouts->begin() + idxToErase);
 }
 
 void ScoutManager::addNewScout(BWAPI::Unit unit) {
-	Scout scout(unit);
-	_scouts->push_back(scout);
+	_scouts->push_back(std::make_shared<Scout>(unit));
 	WorkerManager::Instance().setScoutWorker(unit);
 }
 
