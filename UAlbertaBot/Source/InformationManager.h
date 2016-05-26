@@ -9,6 +9,7 @@
 
 namespace UAlbertaBot
 {
+
 struct BaseInfo;
 typedef std::vector<BaseInfo> BaseInfoVector;
 
@@ -18,7 +19,7 @@ class InformationManager
     
     BWAPI::Player       _self;
     BWAPI::Player       _enemy;
-
+	std::pair<state, BWAPI::Position>					_currentAction;
     std::map<BWAPI::Player, UnitData>                   _unitData;
     std::map<BWAPI::Player, BWTA::BaseLocation *>       _mainBaseLocations;
     std::map<BWAPI::Player, std::set<BWTA::Region *> >  _occupiedRegions;
@@ -61,6 +62,8 @@ public:
 
     std::set<BWTA::Region *> &  getOccupiedRegions(BWAPI::Player player);
     BWTA::BaseLocation *    getMainBaseLocation(BWAPI::Player player);
+
+	std::pair<state, BWAPI::Position> getCurrentAction();
 
     bool                    enemyHasCloakedUnits();
 

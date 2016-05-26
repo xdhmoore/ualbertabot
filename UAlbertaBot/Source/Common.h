@@ -27,6 +27,8 @@ BWAPI::AIModule * __NewAIModule();
 
 #define UALBERTABOT_PROJECT
 
+enum state { ATTACKING, DEFENDING, EXPANDING };
+
 struct double2
 {
 	double x,y;
