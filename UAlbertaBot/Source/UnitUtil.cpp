@@ -199,3 +199,4 @@ BWAPI::Unit UnitUtil::GetClosestUnitTypeToTarget(BWAPI::UnitType type, BWAPI::Po
 
 	return closestUnit;
 }
+

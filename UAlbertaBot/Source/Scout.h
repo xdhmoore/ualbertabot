@@ -40,6 +40,7 @@ class Scout
 		void                            drawScoutInformation(int x, int y);
 
 		BWAPI::Unit						getWorkerScout();
+		bool							isValid();
 
 		void onSendText(std::string text);
 		void onUnitShow(BWAPI::Unit unit);

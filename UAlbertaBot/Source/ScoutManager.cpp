@@ -1,6 +1,6 @@
 #include "ScoutManager.h"
 #include "ProductionManager.h"
-
+#include "UnitUtil.h"
 using namespace UAlbertaBot;
 
 ScoutManager::ScoutManager() 
@@ -24,11 +24,25 @@ void ScoutManager::update()
         return;
     }
 
+	removeDeadScouts();
+
 	std::for_each(_scouts->begin(), _scouts->end(), [](std::shared_ptr<Scout> s){
 		s->moveScouts();
 		s->drawScoutInformation(200, 320);
 	});
 
+}
+
+void ScoutManager::removeDeadScouts() {
+	int i = 0;
+	while (i < _scouts->size()) {
+		if (!_scouts->at(i)->isValid()) {
+			_scouts->erase(_scouts->begin() + i);
+		}
+		else {
+			i++;
+		}
+	}
 }
 
 bool ScoutManager::scoutsFull() {

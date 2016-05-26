@@ -16,6 +16,7 @@ class ScoutManager
 
 	bool							scoutsFull();
 	void							removeRandomScout();
+	void							removeDeadScouts();
 	void							addNewScout(BWAPI::Unit);
 	
 public:

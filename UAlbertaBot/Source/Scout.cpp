@@ -3,6 +3,7 @@
 #include "MapTools.h"
 #include "Micro.h"
 #include "ProductionManager.h"
+#include "UnitUtil.h"
 
 using namespace UAlbertaBot;
 
@@ -30,6 +31,10 @@ Scout::~Scout()
 
 BWAPI::Unit Scout::getWorkerScout() {
 	return _workerScout;
+}
+
+bool Scout::isValid() {
+	return UnitUtil::IsValidUnit(_workerScout);
 }
 
 void Scout::drawScoutInformation(int x, int y)
