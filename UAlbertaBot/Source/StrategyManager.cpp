@@ -70,6 +70,11 @@ const bool StrategyManager::shouldExpandNow() const
         return true;
     }
 
+	/* TODO: This may have to be integrated with the loop below*/
+	if (InformationManager::Instance().getCurrentAction().first == EXPANDING) {
+		return true;
+	}
+
     // we will make expansion N after array[N] minutes have passed
     std::vector<int> expansionTimes = {5, 10, 20, 30, 40 , 50};
 

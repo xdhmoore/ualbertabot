@@ -65,8 +65,9 @@ void CombatCommander::update(const BWAPI::Unitset & combatUnits)
         updateIdleSquad();
         updateDropSquads();
         updateScoutDefenseSquad();
-		updateDefenseSquads();
 		updateAttackSquads();
+		updateDefenseSquads();
+		
 	}
 
 	_squadData.update();
@@ -485,6 +486,12 @@ BWAPI::Position CombatCommander::getMainAttackLocation()
                 onlyOverlords = false;
             }
         }
+
+		/* prioritize new base for attacking*/
+		std::pair<state, BWAPI::Position> currAction = InformationManager::Instance().getCurrentAction();
+		if (currAction.first == ATTACKING) {
+			return currAction.second;
+		}
 
         if (!BWAPI::Broodwar->isExplored(BWAPI::TilePosition(enemyBasePosition)) || !enemyUnitsInArea.empty())
         {
