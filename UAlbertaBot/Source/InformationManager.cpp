@@ -270,20 +270,19 @@ std::pair<state, BWAPI::Position> InformationManager::getCurrentAction() {
 	return _currentAction;
 }
 
-bool InformationManager::isEnemyBuildingInRegion(BWTA::Region * region) 
-{
+bool InformationManager::playerHasBuildingInRegion(BWTA::Region * region, BWAPI::Player player) {
 	// invalid regions aren't considered the same, but they will both be null
 	if (!region)
 	{
 		return false;
 	}
 
-	for (const auto & kv : _unitData[_enemy].getUnits())
+	for (const auto & kv : _unitData[player].getUnits())
 	{
 		const UnitInfo & ui(kv.second);
-		if (ui.type.isBuilding()) 
+		if (ui.type.isBuilding())
 		{
-			if (BWTA::getRegion(BWAPI::TilePosition(ui.lastPosition)) == region) 
+			if (BWTA::getRegion(BWAPI::TilePosition(ui.lastPosition)) == region)
 			{
 				return true;
 			}
@@ -291,6 +290,14 @@ bool InformationManager::isEnemyBuildingInRegion(BWTA::Region * region)
 	}
 
 	return false;
+}
+
+bool InformationManager::isMyBuildingInRegion(BWTA::Region * region) {
+	return playerHasBuildingInRegion(region, _self);
+}
+bool InformationManager::isEnemyBuildingInRegion(BWTA::Region * region) 
+{
+	return playerHasBuildingInRegion(region, _enemy);
 }
 
 const UIMap & InformationManager::getUnitInfo(BWAPI::Player player) const

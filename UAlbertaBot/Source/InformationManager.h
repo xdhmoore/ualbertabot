@@ -51,7 +51,9 @@ public:
     void					onUnitRenegade(BWAPI::Unit unit)    { updateUnit(unit); }
     void					onUnitDestroy(BWAPI::Unit unit);
 
+	bool					playerHasBuildingInRegion(BWTA::Region* region, BWAPI::Player player);
     bool					isEnemyBuildingInRegion(BWTA::Region * region);
+	bool					isMyBuildingInRegion(BWTA::Region * region);
     int						getNumUnits(BWAPI::UnitType type,BWAPI::Player player);
     bool					nearbyForceHasCloaked(BWAPI::Position p,BWAPI::Player player,int radius);
     bool					isCombatUnit(BWAPI::UnitType type) const;

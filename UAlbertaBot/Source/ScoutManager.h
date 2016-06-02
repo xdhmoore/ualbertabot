@@ -18,7 +18,8 @@ class ScoutManager
 	void							removeRandomScout();
 	void							removeDeadScouts();
 	void							addNewScout(BWAPI::Unit);
-	
+	BWTA::BaseLocation*				getNextBaseToScout();
+
 public:
 	
     static ScoutManager & Instance();

@@ -1,6 +1,7 @@
 #include "ScoutManager.h"
 #include "ProductionManager.h"
 #include "UnitUtil.h"
+#include <vector>
 using namespace UAlbertaBot;
 
 ScoutManager::ScoutManager() 
@@ -60,8 +61,36 @@ void ScoutManager::removeRandomScout() {
 }
 
 void ScoutManager::addNewScout(BWAPI::Unit unit) {
-	_scouts->push_back(std::make_shared<Scout>(unit));
+	_scouts->push_back(std::make_shared<Scout>(unit, getNextBaseToScout()));
 	WorkerManager::Instance().setScoutWorker(unit);
+}
+
+BWTA::BaseLocation* ScoutManager::getNextBaseToScout() {
+
+	BWTA::BaseLocation* nextBase;
+
+	//decide whether we want to scout an occupied or unoccupied base with a 30/70 chance
+	bool occupied = (rand() % 10 < 3);
+
+	std::set<BWTA::BaseLocation*> allBaseLocations = BWTA::getBaseLocations();
+	std::vector<BWTA::BaseLocation*> enemyOccupiedBases;
+	std::vector<BWTA::BaseLocation*> unOccupiedBases;
+
+	for (auto it = allBaseLocations.begin(); it != allBaseLocations.end(); it++) {
+		if (InformationManager::Instance().isEnemyBuildingInRegion((*it)->getRegion())) {
+			enemyOccupiedBases.push_back(*it);
+		}
+		else if(!InformationManager::Instance().isMyBuildingInRegion((*it)->getRegion())) {
+			unOccupiedBases.push_back(*it);
+		}
+	}
+
+	if (occupied) {
+		return enemyOccupiedBases[rand() % enemyOccupiedBases.size()];
+	}
+	else {
+		return unOccupiedBases[rand() % unOccupiedBases.size()];
+	}
 }
 
 void ScoutManager::setWorkerScout(BWAPI::Unit unit)

@@ -16,6 +16,7 @@ class Scout
 	int                             _currentRegionVertexIndex;
 	int                             _previousScoutHP;
 	std::shared_ptr<std::vector<BWAPI::Position>>	_targetRegionVertices;
+	BWTA::BaseLocation*				_targetBaseLocation;
 	
 	bool                            enemyWorkerInRadius();
 	bool			                immediateThreat();
@@ -30,7 +31,7 @@ class Scout
 
 		void calculateTargetRegionVertices(BWTA::BaseLocation*);
 
-		Scout(BWAPI::Unit);
+		Scout(BWAPI::Unit, BWTA::BaseLocation*);
 		~Scout();
 		void update();
 

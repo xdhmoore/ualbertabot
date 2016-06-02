@@ -7,7 +7,7 @@
 
 using namespace UAlbertaBot;
 
-Scout::Scout(BWAPI::Unit unit)
+Scout::Scout(BWAPI::Unit unit, BWTA::BaseLocation* targetBase)
 	: _workerScout(unit)
 	, _scoutUnderAttack(false)
 	, _gasStealStatus("None")
@@ -16,10 +16,11 @@ Scout::Scout(BWAPI::Unit unit)
 	, _gasStealFinished(false)
 	, _currentRegionVertexIndex(-1)
 	, _previousScoutHP(0)
+	, _targetBaseLocation(targetBase)
 	, _targetRegionVertices(std::make_shared<std::vector<BWAPI::Position>>())
 {
 	//TODO change this to make bases alterable
-	calculateTargetRegionVertices(InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy()));
+	calculateTargetRegionVertices(_targetBaseLocation);
 	//_workerScout = unit;
 }
 
@@ -336,7 +337,7 @@ int Scout::getClosestVertexIndex(BWAPI::Unit unit)
 
 BWAPI::Position Scout::getFleePosition()
 {
-	UAB_ASSERT_WARNING(!_targetRegionVertices->empty(), "We should have an enemy region vertices if we are fleeing");
+	//UAB_ASSERT_WARNING(!_targetRegionVertices->empty(), "We should have an enemy region vertices if we are fleeing");
 
 	BWTA::BaseLocation * enemyBaseLocation = InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy());
 
@@ -346,7 +347,7 @@ BWAPI::Position Scout::getFleePosition()
 		// so return the closest position in the polygon
 		int closestPolygonIndex = getClosestVertexIndex(_workerScout);
 
-		UAB_ASSERT_WARNING(closestPolygonIndex != -1, "Couldn't find a closest vertex");
+		//UAB_ASSERT_WARNING(closestPolygonIndex != -1, "Couldn't find a closest vertex");
 
 		if (closestPolygonIndex == -1)
 		{
@@ -442,10 +443,14 @@ void Scout::calculateTargetRegionVertices(BWTA::BaseLocation* enemyBaseLocation)
 	}
 
 	auto sortedVertices = std::make_shared<std::vector<BWAPI::Position>>();
-	BWAPI::Position current = *unsortedVertices.begin();
+	BWAPI::Position current;
 
-	_targetRegionVertices->push_back(current);
-	unsortedVertices.erase(current);
+	if (unsortedVertices.size() > 0) {
+		current = *unsortedVertices.begin();
+
+		_targetRegionVertices->push_back(current);
+		unsortedVertices.erase(current);
+	}
 
 	// while we still have unsorted vertices left, find the closest one remaining to current
 	while (!unsortedVertices.empty())
