@@ -9,6 +9,8 @@ const size_t BaseDefensePriority = 2;
 const size_t ScoutDefensePriority = 3;
 const size_t DropPriority = 4;
 
+BWAPI::Position prevAttackLoc;
+
 CombatCommander::CombatCommander() 
     : _initialized(false)
 {
@@ -65,8 +67,9 @@ void CombatCommander::update(const BWAPI::Unitset & combatUnits)
         updateIdleSquad();
         updateDropSquads();
         updateScoutDefenseSquad();
-		updateDefenseSquads();
 		updateAttackSquads();
+		updateDefenseSquads();
+		
 	}
 
 	_squadData.update();
@@ -485,6 +488,17 @@ BWAPI::Position CombatCommander::getMainAttackLocation()
                 onlyOverlords = false;
             }
         }
+
+		/* prioritize new base for attacking*/
+		std::pair<state, BWAPI::Position> currAction = InformationManager::Instance().getCurrentAction();
+		if (InformationManager::Instance().hasExpansion()) {
+			BWAPI::Position attackLoc = InformationManager::Instance().getExpansion();
+			if (currAction.first == ATTACKING && attackLoc.x < 10000 && prevAttackLoc != attackLoc) {
+				BWAPI::Broodwar->printf("Setting attack location to new expansion at: (%d, %d)", attackLoc.x, attackLoc.y);
+				prevAttackLoc = attackLoc;
+				return attackLoc;
+			}
+		}
 
         if (!BWAPI::Broodwar->isExplored(BWAPI::TilePosition(enemyBasePosition)) || !enemyUnitsInArea.empty())
         {

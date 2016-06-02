@@ -32,6 +32,8 @@ class InformationManager
     void                    updateUnitInfo();
     void                    updateBaseLocationInfo();
 	void					updateAttackState();
+	void					updateNumDefenses();
+	void					updateNumBases();
     void                    updateOccupiedRegions(BWTA::Region * region,BWAPI::Player player);
     bool                    isValidUnit(BWAPI::Unit unit);
 
@@ -72,6 +74,10 @@ public:
     void                    drawExtendedInterface();
     void                    drawUnitInformation(int x,int y);
     void                    drawMapInformation();
+	bool					hasExpansion();
+	BWAPI::Position			getExpansion();
+	int						getNumDefenses();
+	int						getNumEnemyBases();
 
     const UnitData &        getUnitData(BWAPI::Player player) const;
 };

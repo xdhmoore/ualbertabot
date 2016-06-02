@@ -4,7 +4,7 @@
 
 using namespace UAlbertaBot;
 
-int numEnemyBases = 1;
+int numEnemyBases = 0;
 int numEnemyDefenses = 0;
 std::unordered_set<BWAPI::Unit> enemyBases;
 std::unordered_set<BWAPI::Unit> enemyDefenses;
@@ -22,7 +22,7 @@ InformationManager & InformationManager::Instance()
 	return instance;
 }
 
-void updateNumBases()
+void InformationManager::updateNumBases()
 {
 	if (BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus) > numEnemyBases ||
 		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Terran_Command_Center) > numEnemyBases ||
@@ -31,7 +31,9 @@ void updateNumBases()
 		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Zerg_Hive)	> numEnemyBases) {
 
 		numEnemyBases++;
-		BWAPI::Broodwar->printf("Enemy Has Expanded! Current number of enemy bases = %d", numEnemyBases);
+		if (numEnemyBases > 1) {
+			BWAPI::Broodwar->printf("Enemy Has Expanded! Current number of enemy bases = %d", numEnemyBases);
+		}
 	}
 
 	for (BWAPI::Unit u : BWAPI::Broodwar->enemy()->getUnits()) {
@@ -44,12 +46,16 @@ void updateNumBases()
 				u->getType() == BWAPI::UnitTypes::Zerg_Lair ||
 				u->getType() == BWAPI::UnitTypes::Zerg_Hive) {
 
-				if (!enemyBases.count(u)) {
+				/* TODO: Add check to make sure that new base hasn't finished being constructed?*/
+				if (!enemyBases.count(u)) { 
 					enemyBases.emplace(u);
 					BWAPI::Position pos = u->getPosition();
 					BWAPI::Broodwar->printf("Enemy Has a Base at Coordinates: (%d, %d)", pos.x, pos.y);
 					BWAPI::Broodwar->drawCircleMap(pos.x, pos.y, 20, BWAPI::Colors::Red);
-					/* TODO: Here we would set current enemy strategy and then try and immediately attack this new base with units available*/
+					if (numEnemyBases > 1) {
+						_currentAction.first = ATTACKING;
+						_currentAction.second = pos;
+					}
 				}
 			}
 		}
@@ -62,8 +68,13 @@ bool isDefense(BWAPI::UnitType type) {
 		type == BWAPI::UnitTypes::Terran_Bunker;
 }
 
-void updateNumDefenses()
+void InformationManager::updateNumDefenses()
 {
+	int frame = BWAPI::Broodwar->getFrameCount();
+	int minute = frame / (24 * 60);
+	/*TODO: Placeholder but it's a threshold based on gametime*/
+	unsigned int defenseThreshold = minute;
+
 	if (BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon) > numEnemyDefenses ||
 		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker) > numEnemyDefenses ||
 		BWAPI::Broodwar->enemy()->allUnitCount(BWAPI::UnitTypes::Zerg_Sunken_Colony) > numEnemyDefenses) {
@@ -80,20 +91,51 @@ void updateNumDefenses()
 					BWAPI::Position pos = u->getPosition();
 					BWAPI::Broodwar->printf("Enemy Has a Defense at Coordinates: (%d, %d)", pos.x, pos.y);
 					BWAPI::Broodwar->drawCircleMap(pos.x, pos.y, 20, BWAPI::Colors::Red);
-					/* TODO: Here we would change the enemy strategy based on whether we think they are defending with this unit*/
+					if (enemyDefenses.size() > defenseThreshold) {
+						_currentAction.first = EXPANDING;
+						BWAPI::Broodwar->printf("Trying to expand...");
+						/*Location won't matter, this will only be used when deciding to expand*/
+					}
 				}
 			}
 		}
 	}
 }
 
+bool InformationManager::hasExpansion() {
+	return enemyBases.size() > 1;
+}
+
+BWAPI::Position InformationManager::getExpansion() {
+	return (*enemyBases.cbegin())->getPosition();
+}
+
+int InformationManager::getNumDefenses() {
+	return enemyDefenses.size();
+}
+
+int InformationManager::getNumEnemyBases() {
+	return enemyBases.size();
+}
+
 void InformationManager::update() 
 {
 	updateUnitInfo();
 	updateBaseLocationInfo();
-	updateNumBases();
-	updateNumDefenses();
-	updateAttackState();
+	/*The ordering of these functions prioritizes later called ones higher*/
+	int frame = BWAPI::Broodwar->getFrameCount();
+	int minute = frame / (24 * 12);
+	static int lastMinute = 0;
+	/*only update state on new minute*/
+	if (minute > lastMinute) {
+		lastMinute = minute;
+		//Expand if over threshold count of defenses
+		updateNumDefenses();
+		//Attack if enemy expanding
+		updateNumBases();
+		//Defend if enemy attacking
+		updateAttackState();
+	}
 }
 
 void InformationManager::updateAttackState()
@@ -131,6 +173,10 @@ void InformationManager::updateAttackState()
 						BWAPI::Broodwar->printf("Enemy is Attacking!!!!!");
 						BWAPI::Broodwar->drawTextMap(coord, "%d, %d", p.x, p.y);
 						BWAPI::Broodwar->drawTextMap(draw, "Enemy is %.0lf away", distance);
+
+						_currentAction.first = DEFENDING;
+						_currentAction.second = b;
+
 						break;
 					}
 				}
