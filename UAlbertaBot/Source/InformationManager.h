@@ -72,6 +72,9 @@ public:
     void                    drawExtendedInterface();
     void                    drawUnitInformation(int x,int y);
     void                    drawMapInformation();
+	bool					hasExpansion();
+	BWAPI::Position			getExpansion();
+	int						getNumDefenses();
 
     const UnitData &        getUnitData(BWAPI::Player player) const;
 };

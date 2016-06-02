@@ -102,6 +102,18 @@ void InformationManager::updateNumDefenses()
 	}
 }
 
+bool InformationManager::hasExpansion() {
+	return enemyBases.size() > 1;
+}
+
+BWAPI::Position InformationManager::getExpansion() {
+	return (*enemyBases.cbegin())->getPosition();
+}
+
+int InformationManager::getNumDefenses() {
+	return enemyDefenses.size();
+}
+
 void InformationManager::update() 
 {
 	updateUnitInfo();
