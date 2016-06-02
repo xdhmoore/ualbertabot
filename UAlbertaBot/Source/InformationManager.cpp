@@ -114,13 +114,17 @@ int InformationManager::getNumDefenses() {
 	return enemyDefenses.size();
 }
 
+int InformationManager::getNumEnemyBases() {
+	return enemyBases.size();
+}
+
 void InformationManager::update() 
 {
 	updateUnitInfo();
 	updateBaseLocationInfo();
 	/*The ordering of these functions prioritizes later called ones higher*/
 	int frame = BWAPI::Broodwar->getFrameCount();
-	int minute = frame / (24 * 60);
+	int minute = frame / (24 * 12);
 	static int lastMinute = 0;
 	/*only update state on new minute*/
 	if (minute > lastMinute) {

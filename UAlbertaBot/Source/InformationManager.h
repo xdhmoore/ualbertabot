@@ -75,6 +75,7 @@ public:
 	bool					hasExpansion();
 	BWAPI::Position			getExpansion();
 	int						getNumDefenses();
+	int						getNumEnemyBases();
 
     const UnitData &        getUnitData(BWAPI::Player player) const;
 };
