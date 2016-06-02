@@ -58,7 +58,7 @@ const bool StrategyManager::shouldExpandNow() const
 	int frame           = BWAPI::Broodwar->getFrameCount();
     int minute          = frame / (24*60);
 
-	if (numDepots < InformationManager::Instance().getNumDefenses()) {
+	if (3 * numDepots <= InformationManager::Instance().getNumDefenses()) {
 		BWAPI::Broodwar->printf("Enemy has %d defenses, we have %d bases. We should expnand.", InformationManager::Instance().getNumDefenses(), numDepots);
 		return true;
 	}
