@@ -489,7 +489,8 @@ BWAPI::Position CombatCommander::getMainAttackLocation()
 
 		/* prioritize new base for attacking*/
 		std::pair<state, BWAPI::Position> currAction = InformationManager::Instance().getCurrentAction();
-		if (currAction.first == ATTACKING) {
+
+		if (currAction.first == ATTACKING && !(currAction.second.x == 0 && currAction.second.y == 0) ) {
 			return currAction.second;
 		}
 
