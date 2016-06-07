@@ -1,7 +1,9 @@
-UAlbertaBot - StarCraft AI Competition Bot
 
-Author:  David Churchill (dave.churchill@gmail.com)
+UAlbertaBotMod - StarCraft AI Competition Bot for Cal Poly CSC 480 - Intro to AI
 
-Please check out the [Wiki](https://github.com/davechurchill/ualbertabot/wiki) for full instructions and documentation!
+by Team SCAINET
 
-Please consider the code in this repository as unstable research code. Stable releases can be found in the [stable release section](https://github.com/davechurchill/ualbertabot/tree/master/binary_stable_releases). Note that the instructions included in the wiki may not be correct for older binary releases.
+Original UAlbertaBot by David Churchill (dave.churchill@gmail.com)
+
+UAlbertaBot Wiki at  https://github.com/davechurchill/ualbertabot/wiki
+
